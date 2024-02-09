@@ -47,22 +47,26 @@ class SSH_Manager:
         self.user = args.username
         self.passwd = args.password
         self.ip = args.ip
+        self.sess = None
         self.command = args.command
         self.shel = args.shell
         self.name = ""
         if not self.ip or args.wizard:
             self.menu()
-        # if args.wizard:
-        #     self.menu()
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            if self.user == "root":
+                self.name = f"root💀{self.ip} ~# "
+            else:
+                self.name = f"{self.user}💀{self.ip} ~$ "
+
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
-            client.connect(self.ip, username=self.user, password=self.passwd)
+            self.client.connect(self.ip, username=self.user, password=self.passwd)
+            self.sess = self.client.get_transport().open_session()
             print("💀 connected successfully to the ssh server !")
         except:
             print("💀 something has gone wrong , try again \ncauses :\n1. network connection\n2. wrong password")
             sys.exit(0)
-        self.ssh_sess = client.get_transport().open_session()
         if self.user == "root":
             self.name = f"root💀{self.ip} ~# "
         else:
@@ -100,10 +104,25 @@ dX.    9Xb      .dXb    __                         __    dXb.     dXP     .Xb
         self.ip = input("💀 [ enter ip ] ► ")
         self.user = input("💀 [ enter username ] ► ")
         self.passwd = pwinput.pwinput(prompt="💀 [ enter password ] ► ", mask="💀")
+        if self.user == "root":
+            self.name = f"root💀{self.ip} ~# "
+        else:
+            self.name = f"{self.user}💀{self.ip} ~$ "
+
+        self.shell()
     def ssh_session(self, command):
-        if self.ssh_sess.active:
-            self.ssh_sess.exec_command(command)
-            print(f"[Server] {self.ssh_sess.recv(4096).decode()}")
+        self.client = paramiko.SSHClient()
+        self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            self.client.connect(self.ip, username=self.user, password=self.passwd)
+            self.sess = self.client.get_transport().open_session()
+            # print("💀 connected successfully to the ssh server !")
+        except:
+            print("💀 something has gone wrong , try again \ncauses :\n1. network connection\n2. wrong password")
+            sys.exit(0)
+        if self.sess.active:
+            self.sess.exec_command(command)
+            print(f"[Server] {self.sess.recv(4096).decode()}")
             return True
         if not ssh_sess.active:
             print("[X] Failed to activate the ssh connection ")
