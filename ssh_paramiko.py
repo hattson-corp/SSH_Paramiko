@@ -50,10 +50,10 @@ class SSH_Manager:
         self.command = args.command
         self.shel = args.shell
         self.name = ""
-        if not self.ip:
+        if not self.ip or args.wizard:
             self.menu()
-        if args.wizard:
-            self.menu()
+        # if args.wizard:
+        #     self.menu()
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         try:
